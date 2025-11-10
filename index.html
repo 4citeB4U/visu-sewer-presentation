@@ -1,0 +1,101 @@
+<!-- LEEWAY HEADER
+TAG: UI.HTML.ENTRY
+COLOR_ONION_HEX: NEON=#39FF14 FLUO=#0DFF94 PASTEL=#C7FFD8
+ICON_FAMILY: lucide
+ICON_GLYPH: file-code
+ICON_SIG: CD534113
+5WH: WHAT=SPA HTML entry point for Vite build;
+WHY=Define viewport, meta tags, root div for React mount;
+WHO=LeeWay Industries + VisuSewer;
+WHERE=b:\Visu-Sewer Strategic Asset & Growth Deck\index.html;
+WHEN=2025-11-08;
+HOW=HTML5 with Vite script injection
+AGENTS: GEMINI, CLAUDE, GPT4, LLAMA
+SPDX-License-Identifier: MIT
+-->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Visu-Sewer Strategic Proposal</title>
+  <link rel="icon" href="/images/visu-sewer-logo.png" type="image/png" />
+  <!-- Tailwind CSS now imported via src/index.css inside the module graph -->
+    <script>
+      console.warn('Tailwind CDN removed for production. Using local Tailwind setup.');
+    </script>
+    <style>
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      
+      body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-image: 
+          radial-gradient(circle at 25% 25%, rgba(0, 0, 0, 0.03) 2px, transparent 0),
+          radial-gradient(circle at 75% 75%, rgba(0, 0, 0, 0.03) 2px, transparent 0);
+        background-size: 50px 50px;
+        z-index: -1;
+        animation: spin 60s linear infinite;
+        opacity: 0.5;
+      }
+
+      /* Custom scrollbar for webkit browsers */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #f1f5f9; /* slate-100 */
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #94a3b8; /* slate-400 */
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #64748b; /* slate-500 */
+      }
+
+      .watermark {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        font-size: 14px;
+        font-weight: bold;
+        color: rgba(0, 0, 0, 0.08);
+        transform: rotate(-15deg);
+        pointer-events: none;
+        z-index: 1000;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.29.0"
+  }
+}
+</script>
+<!-- Bundled CSS is imported from index.tsx -->
+</head>
+  <body class="bg-white font-sans text-gray-800">
+    <div id="root"></div>
+    <div class="watermark">Leeway. Industries.</div>
+    <script type="module">
+      // Expose selected envs to window for non-TS modules like gemma.js.
+      // Must run in an ES module to access import.meta.env in Vite.
+      window.OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
+      window.OPENROUTER_MODEL = import.meta.env.VITE_OPENROUTER_MODEL;
+      window.SITE_URL = import.meta.env.VITE_SITE_URL;
+      window.SITE_TITLE = import.meta.env.VITE_SITE_TITLE;
+    </script>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

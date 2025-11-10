@@ -1,0 +1,5 @@
+Segment ID,Inspection Date,Defect Type,Severity Score,Affected Length
+S001,2023-03-15,Surface Corrosion,7,150
+S002,2023-03-15,Cracks,5,45
+S003,2023-04-01,Joint Separation,8,200
+S004,2023-04-01,Infiltration,6,75

@@ -1,0 +1,7 @@
+{
+  "name": "Visu-Sewer Strategic Asset & Growth Deck",
+  "description": "A strategic pitch deck outlining Visu-Sewer's operational strength and human capital performance plan, tailored for executive review.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
