@@ -43,6 +43,12 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Validate built assets
+        if: always()
+        run: |
+          node --version
+          node scripts/validate-dist.js
+
       - name: Diagnostic - list dist contents
         if: always()
         run: |
