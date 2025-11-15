@@ -136,6 +136,17 @@ export class AgentTeam {
             all: responses
         };
     }
+
+    /**
+     * Explain a chart or dataset. Accepts a short identifier or natural language
+     * describing which chart to explain. The method will retrieve local data,
+     * craft an analyst prompt, and return the models' best answer.
+     */
+    async explainChart(selector, question = '') {
+        const localData = await this.retrieveLocalData(selector, question);
+        const prompt = `You are a data analyst. The user requests: ${question || selector}.\n\nUse the following local data as context:\n${localData}\n\nProvide: 1) A short summary of what the chart likely shows. 2) Three actionable insights. 3) One suggested visualization improvement or follow-up analysis.`;
+        return await this.answer(prompt, `Chart explanation context for selector: ${selector}`);
+    }
 }
 
 export const agentTeam = new AgentTeam();
