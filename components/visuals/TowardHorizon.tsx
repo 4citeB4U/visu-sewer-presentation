@@ -52,7 +52,7 @@ export const TowardHorizon: React.FC<{ section: DeckSection }> = ({ section }) =
                     <div className="shrink-0 rounded-lg shadow border border-amber-200 bg-white p-2">
                                     <div className="relative h-40 md:h-52 lg:h-60 w-88 md:w-120 lg:w-152">
                                         <img
-                                            src="/images/feild-technician-first-guy.png"
+                                            src={`${(import.meta as any).env.BASE_URL}images/feild-technician-first-guy.png`}
                                             alt="Field Technician"
                                             className="w-full h-full object-cover saturate-125 contrast-110 brightness-105"
                                         />

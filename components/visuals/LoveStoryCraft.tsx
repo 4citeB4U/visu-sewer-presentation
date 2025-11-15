@@ -43,7 +43,7 @@ export const LoveStoryCraft: React.FC<{ section: DeckSection }> = ({ section }) 
           <div className="md:col-span-1 h-full flex flex-col items-center">
             <div className="w-full h-full rounded-xl overflow-hidden shadow border border-gray-200 bg-white">
               <img
-                src="/images/feild-technician-top-man.png"
+                src={(section.content as any).image?.startsWith('/') ? `${(import.meta as any).env.BASE_URL}${(section.content as any).image.replace(/^\//,'')}` : (section.content as any).image || `${(import.meta as any).env.BASE_URL}images/feild-technician-top-man.png`}
                 alt="Field Technician – top man"
                 className="w-full h-full object-cover saturate-125 contrast-110 brightness-105"
               />

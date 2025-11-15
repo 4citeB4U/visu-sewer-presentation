@@ -56,7 +56,7 @@ export const ServiceStack: React.FC<{ section: DeckSection }> = ({ section }) =>
             <div className="grid grid-cols-2 gap-3 grow overflow-hidden">
                 {/* Truck Image - Left 50% */}
                 <div className="bg-white rounded-lg border-2 border-blue-200 shadow-lg overflow-hidden flex items-center justify-center">
-                    <img src={image} alt="Visu-Sewer Service Truck" className="w-full h-full object-cover"/>
+                    <img src={(image && image.startsWith('/')) ? `${(import.meta as any).env.BASE_URL}${image.replace(/^\//,'')}` : image || `${(import.meta as any).env.BASE_URL}images/visu-sewer-truck.png`} alt="Visu-Sewer Service Truck" className="w-full h-full object-cover"/>
                 </div>
 
                 {/* Right side - 3 charts stacked */}

@@ -20,21 +20,22 @@ import { defineConfig, loadEnv } from 'vite';
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
     const desiredPort = Number(env.VITE_PORT || 5180);
-    return {
-      server: {
-        port: 5180, // Changed port for a brand new start
-        host: '0.0.0.0',
-        strictPort: true, // If 5180 is occupied, fail fast instead of auto-picking a new port
-      },
-      plugins: [react()],
-      define: {
-        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
-      },
-      resolve: {
-        alias: {
-          '@': path.resolve(__dirname, '.'),
+      return {
+        base: '/visu-sewer-presentation/',
+        server: {
+          port: 5180, // Changed port for a brand new start
+          host: '0.0.0.0',
+          strictPort: true, // If 5180 is occupied, fail fast instead of auto-picking a new port
+        },
+        plugins: [react()],
+        define: {
+          'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+          'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+        },
+        resolve: {
+          alias: {
+            '@': path.resolve(__dirname, '.'),
+          }
         }
-      }
-    };
+      };
 });

@@ -43,6 +43,13 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Diagnostic - list dist contents
+        if: always()
+        run: |
+          echo "Dist listing:"; ls -la dist
+          echo "Show dist/index.html head:"; (head -n 60 dist/index.html || true)
+          echo "Show dist assets:"; ls -la dist/assets || true
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:

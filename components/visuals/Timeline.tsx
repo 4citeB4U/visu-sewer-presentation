@@ -53,7 +53,7 @@ export const Timeline: React.FC<TimelineProps> = ({ section }) => {
                 <div className="relative rounded-xl overflow-hidden shadow border border-gray-200 bg-white">
                     <div ref={imgWrapRef} className="absolute inset-0 will-change-transform">
                         <img
-                            src={section.content.image || '/images/geographic-footprint.png'}
+                            src={(section.content.image && section.content.image.startsWith('/')) ? `${(import.meta as any).env.BASE_URL}${section.content.image.replace(/^\//,'')}` : section.content.image || `${(import.meta as any).env.BASE_URL}images/geographic-footprint.png`}
                             alt="Geographic footprint"
                             className="w-full h-full object-cover saturate-125 contrast-110 brightness-105"
                         />

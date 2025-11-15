@@ -147,7 +147,7 @@ const App: React.FC = () => {
                             disabled={currentSection === 0}
                             className="flex flex-col items-center transition-transform transform hover:scale-105 disabled:opacity-30 disabled:cursor-not-allowed"
                         >
-                            <img src="/images/Visu-Sewer-Button.png" alt="Previous" className="h-20 w-20 object-contain" />
+                            <img src={`${(import.meta as any).env.BASE_URL}images/Visu-Sewer-Button.png`} alt="Previous" className="h-20 w-20 object-contain" />
                             <div className="text-xs font-medium text-gray-600 mt-1">Previous</div>
                         </button>
                          <div className="flex-1 text-center px-8">
@@ -161,7 +161,7 @@ const App: React.FC = () => {
                             disabled={currentSection === pitchDeckData.length - 1}
                             className="flex flex-col items-center transition-transform transform hover:scale-105 disabled:opacity-30 disabled:cursor-not-allowed"
                         >
-                            <img src="/images/visu-sewer-logo-button.png" alt="Next" className="h-20 w-20 object-contain" />
+                            <img src={`${(import.meta as any).env.BASE_URL}images/visu-sewer-logo-button.png`} alt="Next" className="h-20 w-20 object-contain" />
                             <div className="text-xs font-medium text-gray-600 mt-1">Next</div>
                         </button>
                     </footer>

@@ -12,7 +12,7 @@ export const LoveStoryOps: React.FC<{ section: DeckSection }> = ({ section }) =>
     <div className="h-full relative overflow-hidden">
       {/* Background image (absolute) */}
       <img
-        src="/images/finished-tunnel.png"
+  src={`${(import.meta as any).env.BASE_URL}images/finished-tunnel.png`}
         alt="Finished tunnel infrastructure"
         aria-hidden
         className="absolute inset-0 w-full h-full object-cover saturate-125 contrast-110 brightness-105"

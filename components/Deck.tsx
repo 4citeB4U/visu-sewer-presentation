@@ -50,7 +50,7 @@ const renderContent = (section: DeckSection) => {
                     {section.content.backgroundImage && (
                         <>
                             <img
-                                src={section.content.backgroundImage}
+                                src={section.content.backgroundImage?.startsWith('/') ? `${(import.meta as any).env.BASE_URL}${section.content.backgroundImage.replace(/^\//,'')}` : section.content.backgroundImage}
                                 alt="Cover background"
                                 aria-hidden
                                 className="absolute inset-0 w-full h-full object-cover saturate-125 contrast-110 brightness-105"
@@ -118,7 +118,7 @@ const renderContent = (section: DeckSection) => {
                             {/* Right: image ~1/2 page width */}
                             <div className="order-1 md:order-2 flex flex-col items-center">
                                 <div className="w-full h-[50vh] md:h-[60vh] lg:h-[65vh] rounded-xl overflow-hidden shadow border border-gray-200 bg-white">
-                                    <img src="/images/feild-technician.png" alt="Field Technician" className="w-full h-full object-cover" />
+                                    <img src={`${(import.meta as any).env.BASE_URL}images/feild-technician.png`} alt="Field Technician" className="w-full h-full object-cover" />
                                 </div>
                                 <span className="mt-2 text-xs text-gray-600">Field Technician</span>
                             </div>

@@ -136,7 +136,7 @@ export const OrgChart: React.FC<OrgChartProps> = ({ section }) => {
                     onClick={() => setSelectedMember(leadership)}
                     className="p-2 bg-linear-to-br from-blue-600 to-blue-700 border-2 border-blue-800 shadow-xl rounded-lg text-center w-32 cursor-pointer hover:shadow-2xl transition-all duration-200 hover:scale-105"
                 >
-                    <img src={leadership.photoUrl} onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/src/images/placeholder-male.png'; }} alt={leadership.name} className="w-10 h-10 rounded-full mb-1 mx-auto object-cover border-2 border-white" />
+                    <img src={leadership.photoUrl?.startsWith('/') ? `${(import.meta as any).env.BASE_URL}${leadership.photoUrl.replace(/^\//,'')}` : leadership.photoUrl} onError={(e) => { (e.currentTarget as HTMLImageElement).src = `${(import.meta as any).env.BASE_URL}images/placeholder-male.png`; }} alt={leadership.name} className="w-10 h-10 rounded-full mb-1 mx-auto object-cover border-2 border-white" />
                     <p className="font-bold text-[10px] text-white leading-tight">{leadership.name}</p>
                     <p className="text-[9px] text-blue-100 font-semibold leading-tight">{leadership.title}</p>
                 </div>
@@ -154,7 +154,7 @@ export const OrgChart: React.FC<OrgChartProps> = ({ section }) => {
                                 onClick={() => setSelectedMember(exec)}
                                 className={`${scheme.card} rounded text-center cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-200`}
                             >
-                                <img src={exec.photoUrl} onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/src/images/placeholder-male.png'; }} alt={exec.name} className={`w-8 h-8 rounded-full mb-0.5 mx-auto object-cover border ${scheme.img}`} />
+                                <img src={exec.photoUrl?.startsWith('/') ? `${(import.meta as any).env.BASE_URL}${exec.photoUrl.replace(/^\//,'')}` : exec.photoUrl} onError={(e) => { (e.currentTarget as HTMLImageElement).src = `${(import.meta as any).env.BASE_URL}images/placeholder-male.png`; }} alt={exec.name} className={`w-8 h-8 rounded-full mb-0.5 mx-auto object-cover border ${scheme.img}`} />
                                 <p className={`font-bold text-[8px] leading-tight ${scheme.name}`}>{exec.name}</p>
                                 <p className={`text-[7px] font-semibold leading-tight ${scheme.title}`}>{exec.title}</p>
                             </div>
@@ -176,7 +176,7 @@ export const OrgChart: React.FC<OrgChartProps> = ({ section }) => {
                                     onClick={() => setSelectedMember(manager)}
                                     className={`${scheme.card} rounded text-center cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-200`}
                                 >
-                                    <img src={manager.photoUrl} onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/src/images/placeholder-male.png'; }} alt={manager.name} className={`w-7 h-7 rounded-full mb-0.5 mx-auto object-cover border ${scheme.img}`} />
+                                    <img src={manager.photoUrl?.startsWith('/') ? `${(import.meta as any).env.BASE_URL}${manager.photoUrl.replace(/^\//,'')}` : manager.photoUrl} onError={(e) => { (e.currentTarget as HTMLImageElement).src = `${(import.meta as any).env.BASE_URL}images/placeholder-male.png`; }} alt={manager.name} className={`w-7 h-7 rounded-full mb-0.5 mx-auto object-cover border ${scheme.img}`} />
                                     <p className={`font-bold text-[8px] leading-tight ${scheme.name}`}>{manager.name}</p>
                                     <p className={`text-[7px] font-semibold leading-tight ${scheme.title}`}>{manager.title}</p>
                                 </div>

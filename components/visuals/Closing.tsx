@@ -28,7 +28,7 @@ export const Closing: React.FC<{ section: DeckSection }> = ({ section }) => {
                 <div className="closing-message opacity-0 flex items-center justify-center">
                     <div className="w-full max-w-md">
                         <img 
-                            src="/images/america-visu-sewer.png" 
+                            src={`${(import.meta as any).env.BASE_URL}images/america-visu-sewer.png`} 
                             alt="VisuSewer America" 
                             className="w-full h-auto object-contain drop-shadow-2xl" 
                         />

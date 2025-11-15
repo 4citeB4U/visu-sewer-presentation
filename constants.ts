@@ -199,7 +199,7 @@ export const pitchDeckData: DeckSection[] = [
                              { name: 'Mark Burcham', title: 'Division Manager, Virginia', tagline: 'VA operations', photoUrl: 'https://i.ibb.co/svC9qD1/placeholder-male.png' },
                              { name: 'Mike Bright', title: 'Water Blasting Division Manager', tagline: 'Cleaning operations', photoUrl: 'https://i.ibb.co/svC9qD1/placeholder-male.png' },
                              { name: 'Todd Bonk', title: 'CIPP Division Manager', tagline: 'CIPP operations', photoUrl: 'https://i.ibb.co/svC9qD1/placeholder-male.png' },
-                             { name: 'Drew Setzer', title: 'Service Division Manager', tagline: 'Service delivery', photoUrl: 'https://i.ibb.co/svC9qD1/placeholder-male.png' }
+                             // Removed former employee entry (Drew Setzer) per request
                         ]
                     }
                 ]
