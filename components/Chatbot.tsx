@@ -168,6 +168,13 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isOpen, setIsOpen, startPresen
     const engineLock = String((import.meta as any).env?.VITE_TTS_ENGINE_LOCK || '').toLowerCase() === 'true';
     const [engine, setEngine] = useState('browser');
     const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
+    // Refs to track current presentation state/section for callbacks without stale closures
+    const currentSectionRef = useRef<number>(currentSection);
+    useEffect(() => { currentSectionRef.current = currentSection; }, [currentSection]);
+    const presentationStateRef = useRef<string>(presentationState);
+    useEffect(() => { presentationStateRef.current = presentationState; }, [presentationState]);
+    // Mark when the assistant is narrating deck pages (so onEnded can auto-advance)
+    const narrationInProgressRef = useRef<boolean>(false);
     // Greeting and narration tracking
     const [hasGreeted, setHasGreeted] = useState(false);
     const [lastNarratedSection, setLastNarratedSection] = useState(-1);
@@ -177,8 +184,26 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isOpen, setIsOpen, startPresen
     // TTS hook for narration (only once, after selectedVoice)
     const initialSelectedVoice = (() => { try { return window.localStorage?.getItem('agentLee.voice') || (import.meta as any).env?.VITE_TTS_SELECTED_VOICE || ''; } catch { return (import.meta as any).env?.VITE_TTS_SELECTED_VOICE || ''; } })();
     const [selectedVoice, setSelectedVoice] = useState<string>(initialSelectedVoice);
-    const { play: speak, stop: stopSpeaking, voicesLoaded } = useTTS({ selectedVoice });
+    // Provide onEnded to the TTS hook so we can auto-advance pages when narration completes
+    const { play: speak, stop: stopSpeaking, voicesLoaded } = useTTS({
+        selectedVoice,
+        onEnded: () => {
+            // mark narration finished
+            setNarrationStatus('finished');
+            narrationStatusRef.current = 'finished';
+            // Only auto-advance if this was a page narration and we're in presenting mode
+            if (narrationInProgressRef.current && presentationStateRef.current === 'presenting') {
+                narrationInProgressRef.current = false;
+                const idx = currentSectionRef.current;
+                if (idx < pitchDeckData.length - 1) {
+                    setCurrentSection(idx + 1);
+                }
+            }
+        },
+        onFailure: () => setTTSFailureCount(c => c + 1),
+    });
     const speakRef = useRef<(text: string) => void>(speak);
+    useEffect(() => { speakRef.current = speak; }, [speak]);
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputValue, setInputValue] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -216,6 +241,8 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isOpen, setIsOpen, startPresen
                 console.log('🎤 NOW calling speak function...');
                 setNarrationStatus('started');
                 narrationStatusRef.current = 'started';
+                // Mark that this is a page narration so onEnded will auto-advance
+                narrationInProgressRef.current = true;
                 speakRef.current(greeting);
             }, 100);
             
@@ -240,6 +267,8 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isOpen, setIsOpen, startPresen
                     setMessages(prev => [...prev, { role: 'model', text: pageIntro, sources: [] }]);
                     setNarrationStatus('started');
                     narrationStatusRef.current = 'started';
+                    // mark page narration in progress so onEnded advances to next
+                    narrationInProgressRef.current = true;
                     speakRef.current(pageIntro);
                     setLastNarratedSection(currentSection);
                 }, 800);
@@ -261,6 +290,8 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isOpen, setIsOpen, startPresen
             const timer = setTimeout(() => {
                 const closingMessage = "We've reached the end of our journey together. Thank you for experiencing the Visu-Sewer story with me. This is not just a financial opportunity—it's an invitation to join a legacy of excellence that has been 50 years in the making. If you have any questions or would like to discuss partnership opportunities, I'm here to help.";
                 setMessages(prev => [...prev, { role: 'model', text: closingMessage, sources: [] }]);
+                // Closing narration should not trigger auto-advance (it's the last slide)
+                narrationInProgressRef.current = false;
                 speak(closingMessage);
                 setHasDeliveredClosing(true);
             }, 2000);
@@ -304,13 +335,15 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isOpen, setIsOpen, startPresen
         try {
             // Quick client-side intent: "go to page N"
             const pageMatch = text.match(/page\s+(\d{1,2})/i);
-            if (pageMatch) {
+                if (pageMatch) {
                 const pageNum = Math.max(1, Math.min(parseInt(pageMatch[1], 10), pitchDeckData.length));
                 const idx = pageNum - 1;
                 setCurrentSection(idx);
                 setResumeIndex(idx);
                 const confirmation = `Navigating to Page ${pageNum}: ${pitchDeckData[idx].title}.`;
                 setMessages(prev => [...prev, { role: 'model', text: confirmation, sources: [] }]);
+                // This is a navigation confirmation, not a page narration — do not auto-advance
+                narrationInProgressRef.current = false;
                 speak(confirmation);
                 setIsLoading(false);
                 return;
@@ -375,11 +408,13 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isOpen, setIsOpen, startPresen
                     }
                 }
             }
-            if (!handledAction) {
-                const botMessage: Message = { role: 'model', text: modelText, sources: [] };
-                setMessages(prev => [...prev, botMessage]);
-                speak(modelText);
-            }
+                if (!handledAction) {
+                    const botMessage: Message = { role: 'model', text: modelText, sources: [] };
+                    setMessages(prev => [...prev, botMessage]);
+                    // Chat responses should not auto-advance the deck
+                    narrationInProgressRef.current = false;
+                    speak(modelText);
+                }
         } catch (error) {
             console.error('Error with model pipeline:', error);
             const offlineMsg = fallbackAnswer(text);
@@ -562,6 +597,8 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isOpen, setIsOpen, startPresen
                             onClick={() => {
                                 const testText = "Hello, this is Agent Lee. Audio is working correctly.";
                                 console.log('🔊 Testing audio from button click...');
+                                // test audio — not a page narration
+                                narrationInProgressRef.current = false;
                                 speak(testText);
                             }}
                             className="mt-1.5 w-full text-xs bg-blue-600 text-white py-1 px-2 rounded hover:bg-blue-700 transition-colors"
