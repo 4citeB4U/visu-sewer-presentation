@@ -38,7 +38,7 @@ interface DeckProps {
     section: DeckSection;
 }
 
-const visuSewerLogo = '/images/visu-sewer-logo.png';
+const visuSewerLogo = `${(import.meta as any).env.BASE_URL}images/visu-sewer-logo.png`;
 
 const renderContent = (section: DeckSection) => {
     switch (section.content.type) {

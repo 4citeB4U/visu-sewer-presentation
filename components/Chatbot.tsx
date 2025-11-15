@@ -443,7 +443,7 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isOpen, setIsOpen, startPresen
                 aria-label="Toggle AI Assistant"
             >
                 <div className="absolute inset-0 bg-blue-500 rounded-full blur-xl opacity-50 group-hover:opacity-75 animate-pulse"></div>
-                <img src="/images/agent-lee-visu-sewer.png" alt="Agent Lee AI Assistant" className="relative h-20 w-20 rounded-full object-contain" onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/images/visu-sewer-logo.png'; }} />
+                <img src={`${(import.meta as any).env.BASE_URL}images/agent-lee-visu-sewer.png`} alt="Agent Lee AI Assistant" className="relative h-20 w-20 rounded-full object-contain" onError={(e) => { (e.currentTarget as HTMLImageElement).src = `${(import.meta as any).env.BASE_URL}images/visu-sewer-logo.png`; }} />
             </button>
 
             <div className={`w-full h-full bg-white rounded-2xl shadow-2xl flex flex-col transition-all duration-300 ease-out ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>

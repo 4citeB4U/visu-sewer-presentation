@@ -48,10 +48,13 @@ class GemmaLLM {
 
         // Try OpenRouter first if configured
         try {
-            this.orKey = window.OPENROUTER_API_KEY || '';
-            this.orModel = window.OPENROUTER_MODEL || 'google/gemma-3n-e2b-it:free';
-            this.siteUrl = window.SITE_URL || '';
-            this.siteTitle = window.SITE_TITLE || '';
+            // Prefer Vite build-time envs, fall back to any window globals set at runtime
+            let env = {};
+            try { env = import.meta.env || {}; } catch (e) { env = {}; }
+            this.orKey = env.VITE_OPENROUTER_API_KEY || window.OPENROUTER_API_KEY || '';
+            this.orModel = env.VITE_OPENROUTER_MODEL || window.OPENROUTER_MODEL || 'google/gemma-3n-e2b-it:free';
+            this.siteUrl = env.VITE_SITE_URL || window.SITE_URL || '';
+            this.siteTitle = env.VITE_SITE_TITLE || window.SITE_TITLE || '';
             if (this.orKey) {
                 this.useOpenRouter = true;
                 this.isLoaded = true; // no local model to load
