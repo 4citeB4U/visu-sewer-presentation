@@ -18,7 +18,9 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './animations.css';
+import { initDocStore } from './models/docStoreBootstrap.js';
 import './src/index.css';
+import './src/runtimeEnv';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -26,6 +28,13 @@ if (!rootElement) {
 }
 
 const root = ReactDOM.createRoot(rootElement);
+// bootstrap docStore in the background; do not await so UI loads immediately
+try {
+  initDocStore();
+} catch (e) {
+  console.warn('docStore init failed to start:', e);
+}
+
 root.render(
   <React.StrictMode>
     <App />

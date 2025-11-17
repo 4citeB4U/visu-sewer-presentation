@@ -19,13 +19,25 @@ import { defineConfig, loadEnv } from 'vite';
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
-    const desiredPort = Number(env.VITE_PORT || 5180);
+    const desiredPort = Number(env.VITE_PORT || 5173);
       return {
+        // Use the repo name as base for GitHub Pages deployment
         base: '/visu-sewer-presentation/',
         server: {
-          port: 5180, // Changed port for a brand new start
+          port: desiredPort,
           host: '0.0.0.0',
-          strictPort: true, // If 5180 is occupied, fail fast instead of auto-picking a new port
+          strictPort: true,
+          // Explicit HMR client settings so dev client connects to the same port
+          hmr: {
+            protocol: 'ws',
+            host: 'localhost',
+            port: desiredPort,
+          }
+        },
+        // Output to the `docs` directory so the repository can be published to GitHub Pages
+        build: {
+          outDir: 'docs',
+          emptyOutDir: true,
         },
         plugins: [react()],
         define: {

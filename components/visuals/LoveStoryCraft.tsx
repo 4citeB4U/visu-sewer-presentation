@@ -28,7 +28,7 @@ export const LoveStoryCraft: React.FC<{ section: DeckSection }> = ({ section }) 
             <div className="mt-4 md:mt-5 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
               {section.content.points.map((point: string, i: number) => (
                 <div key={i} className="flex items-start bg-white rounded-lg p-3 md:p-4 shadow border border-gray-200">
-                  <svg className="h-6 w-6 text-amber-600 mr-3 mt-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-6 w-6 text-amber-600 mr-3 mt-1 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <p className="text-gray-800 leading-snug text-sm md:text-base">{point}</p>
@@ -43,7 +43,7 @@ export const LoveStoryCraft: React.FC<{ section: DeckSection }> = ({ section }) 
           <div className="md:col-span-1 h-full flex flex-col items-center">
             <div className="w-full h-full rounded-xl overflow-hidden shadow border border-gray-200 bg-white">
               <img
-                src={(section.content as any).image?.startsWith('/') ? `${(import.meta as any).env.BASE_URL}${(section.content as any).image.replace(/^\//,'')}` : (section.content as any).image || `${(import.meta as any).env.BASE_URL}images/feild-technician-top-man.png`}
+                src={(section.content as any).image?.startsWith('/') ? `${(import.meta as any).env?.BASE_URL || '/'}${(section.content as any).image.replace(/^\//,'')}` : (section.content as any).image || `${(import.meta as any).env?.BASE_URL || '/'}images/feild-technician-top-man.png`}
                 alt="Field Technician – top man"
                 className="w-full h-full object-cover saturate-125 contrast-110 brightness-105"
               />

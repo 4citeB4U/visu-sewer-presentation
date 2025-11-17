@@ -15,7 +15,7 @@ SPDX-License-Identifier: MIT
 */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { filterCuratedVoices } from '../utils/voiceCurated';
+import { filterCuratedVoices, pickBestVoice } from '../utils/voiceCurated';
 
 /**
  * Supported engines for text-to-speech. The hook will attempt to use the
@@ -70,6 +70,10 @@ export interface UseTTSOptions {
     /** Orpheus voice name, e.g. "tara" | "leah" | "jess" | "leo" | "dan" | "mia" | "zac" | "zoe" */
     voice?: string;
   };
+  /** Preferred speaking rate (1.0 is default). */
+  rate?: number;
+  /** Preferred pitch (1.0 is default). */
+  pitch?: number;
 }
 
 /**
@@ -98,6 +102,30 @@ export function useTTS(opts: UseTTSOptions = {}) {
   const [isPlaying, setIsPlaying] = useState(false);
   // Whether audio is currently loading (cloud fetch in progress).
   const [isLoading, setIsLoading] = useState(false);
+
+  // Default voice and prosody preferences
+  const DEFAULT_VOICE_NAME = (import.meta as any).env?.VITE_TTS_SELECTED_VOICE || 'Microsoft EmmaMultilingual Online (Natural) - English (United States) • en-US';
+  const envDefaultRate = parseFloat((import.meta as any).env?.VITE_TTS_DEFAULT_RATE || '') || 1.0;
+  const envDefaultPitch = parseFloat((import.meta as any).env?.VITE_TTS_DEFAULT_PITCH || '') || 0.65;
+  // Prefer persisted user values in localStorage when available; fall back to opts then env defaults.
+  const lsRate = (() => {
+    try {
+      const v = window.localStorage?.getItem('agentLee.rate');
+      return v ? parseFloat(v) : undefined;
+    } catch {
+      return undefined;
+    }
+  })();
+  const lsPitch = (() => {
+    try {
+      const v = window.localStorage?.getItem('agentLee.pitch');
+      return v ? parseFloat(v) : undefined;
+    } catch {
+      return undefined;
+    }
+  })();
+  const desiredRate = opts.rate ?? lsRate ?? envDefaultRate;
+  const desiredPitch = opts.pitch ?? lsPitch ?? envDefaultPitch;
 
   // Web Audio context and nodes for cloud playback.
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -143,6 +171,12 @@ export function useTTS(opts: UseTTSOptions = {}) {
         window.speechSynthesis.onvoiceschanged = null;
       }
     };
+  }, []);
+
+  // Recent TTS events for diagnostics (onstart/onend/onerror)
+  const [ttsEvents, setTtsEvents] = useState<Array<{type: string; info?: string; ts: number}>>([]);
+  const logTtsEvent = useCallback((type: string, info?: string) => {
+    setTtsEvents((prev) => [{ type, info, ts: Date.now() }, ...prev].slice(0, 40));
   }, []);
 
   /** Ensure that an AudioContext exists and is running. */
@@ -253,7 +287,9 @@ export function useTTS(opts: UseTTSOptions = {}) {
   const envSelectedVoice = (import.meta as any).env?.VITE_TTS_SELECTED_VOICE || (window as any).TTS_SELECTED_VOICE;
   const lsSelectedVoice = (() => { try { return window.localStorage?.getItem('agentLee.voice') || ''; } catch { return ''; } })();
   // If voiceLock is enabled, we ignore runtime/local selections and force env voice.
-  const desiredName: string | undefined = voiceLock ? envSelectedVoice : (opts.selectedVoice || opts.preferredVoice || lsSelectedVoice || envSelectedVoice);
+  const desiredName: string | undefined = voiceLock
+    ? (envSelectedVoice || DEFAULT_VOICE_NAME)
+    : (opts.selectedVoice || opts.preferredVoice || lsSelectedVoice || envSelectedVoice || DEFAULT_VOICE_NAME);
         if (desiredName) {
           // Try exact match first
           voice = voices.find((v) => v.name === desiredName) || null;
@@ -279,17 +315,30 @@ export function useTTS(opts: UseTTSOptions = {}) {
         // Helper to speak a single chunk and await its completion
         const speakChunk = (chunk: string) => new Promise<boolean>((res) => {
           const utter = new SpeechSynthesisUtterance(chunk);
+          // Ensure we pick a sensible voice if not already chosen
+          if (!voice) {
+            try {
+              // lazy-get voices from synth in case they updated
+              const vs = synth.getVoices();
+              const picked = pickBestVoice(vs, desiredName);
+              if (picked) voice = picked;
+            } catch {
+              // ignore
+            }
+          }
           if (voice) utter.voice = voice;
-          utter.rate = 1.0; utter.pitch = 1.0; utter.volume = 1.0;
+          // Apply desired prosody: allow overrides via options or env vars
+          utter.rate = desiredRate; utter.pitch = desiredPitch; utter.volume = 1.0;
           let started = false;
           const startTime = performance.now();
-          utter.onstart = () => { started = true; setIsPlaying(true); };
           utter.onend = () => {
             setIsPlaying(false);
+            logTtsEvent('end', `chunk ${chunk.slice(0,40)}`);
             const elapsed = performance.now() - startTime;
             res(started && elapsed >= 50);
           };
-          utter.onerror = (e) => { setIsPlaying(false); onError?.(e); res(false); };
+          utter.onerror = (e) => { setIsPlaying(false); onError?.(e); logTtsEvent('error', String(e)); res(false); };
+          utter.onstart = () => { started = true; setIsPlaying(true); logTtsEvent('start', `chunk ${chunk.slice(0,40)}`); };
           synth.speak(utter);
           // Guard for slow starts
           const startGuardMs = 1500;
@@ -316,7 +365,7 @@ export function useTTS(opts: UseTTSOptions = {}) {
           resolve(false);
       }
     });
-  }, [opts.preferredVoice, onEnded, onError]);
+  }, [opts.preferredVoice, opts.selectedVoice, opts.preferredVoice, onEnded, onError, voiceLock, DEFAULT_VOICE_NAME, desiredRate, desiredPitch]);
 
   // --------------------------------------------------------------------------------------
   // Azure Cognitive Services TTS
@@ -703,6 +752,24 @@ export function useTTS(opts: UseTTSOptions = {}) {
       stop();
     };
   }, [stop]);
+  /**
+   * Mark that the user explicitly provided a gesture that should unlock
+   * browser audio/tts. Call this from an onclick handler to ensure the
+   * browser allows subsequent programmatic playback.
+   */
+  const unlock = useCallback(() => {
+    try {
+      userGestureRef.current = true; // mark that a user action occurred
+      // Attempt to ensure AudioContext is running (best-effort)
+      ensureAudioContext();
+      // Touch speechSynthesis getVoices() to nudge some browsers into loading
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        try { window.speechSynthesis.getVoices(); } catch {}
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
 
   return useMemo(() => ({
     play,
@@ -710,8 +777,10 @@ export function useTTS(opts: UseTTSOptions = {}) {
     isPlaying,
     isLoading,
     engine,
-  setEngine: engineLock ? (() => {}) : setEngine,
+    setEngine: engineLock ? (() => {}) : setEngine,
     availableVoices,
     voicesLoaded,
-  }), [play, stop, isPlaying, isLoading, engine, availableVoices, voicesLoaded]);
+    unlock,
+    ttsEvents,
+  }), [play, stop, isPlaying, isLoading, engine, availableVoices, voicesLoaded, unlock, ttsEvents]);
 }

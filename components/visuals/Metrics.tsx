@@ -38,10 +38,10 @@ export const Metrics: React.FC<{ section: DeckSection }> = ({ section }) => {
                     <div className="md:w-1/2 flex items-center justify-center">
                         <div className="relative w-full h-full max-h-[520px]">
                             <img 
-                                src={(image && image.startsWith('/')) ? `${(import.meta as any).env.BASE_URL}${image.replace(/^\//,'')}` : image}
+                                src={(image && image.startsWith('/')) ? `${(import.meta as any).env?.BASE_URL || '/'}${image.replace(/^\//,'')}` : image}
                                 alt="Human capital operations crew" 
                                 className="rounded-2xl shadow-2xl w-full h-full object-cover border border-gray-200" 
-                                onError={(e) => { (e.currentTarget as HTMLImageElement).src = `${(import.meta as any).env.BASE_URL}images/placeholder-crew.svg`; }}
+                                onError={(e) => { (e.currentTarget as HTMLImageElement).src = `${(import.meta as any).env?.BASE_URL || '/'}images/placeholder-crew.svg`; }}
                             />
                             <div className="absolute inset-0 rounded-2xl ring-1 ring-black/10 pointer-events-none"></div>
                         </div>

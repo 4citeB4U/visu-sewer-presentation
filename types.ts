@@ -91,7 +91,7 @@ export type SectionContentData =
     | { type: 'cover'; title: string; subtitle: string; backgroundImage?: string; methodology?: string; advisory?: string; }
     | { type: 'index'; sections: IndexSection[]; }
     | { type: 'summary'; message: string; points: string[]; image?: string; }
-    | { type: 'timeline'; milestones: TimelineMilestone[]; image?: string; }
+    | { type: 'timeline'; milestones: TimelineMilestone[]; image?: string; message?: string }
     | { type: 'org_chart'; leadership: OrgChartMember; image?: string; }
     | { type: 'service_stack'; stack: ServiceStackItem[]; image?: string; }
     | { type: 'projects'; projects: FlagshipProject[]; image?: string; }
@@ -105,4 +105,31 @@ export interface DeckSection {
     title: string;
     narrative: string;
     content: SectionContentData;
+}
+
+export interface ReferenceClaim {
+    claim: string;
+    sources: string[];
+    filePaths?: string[];
+    visibility?: 'Public' | 'AO-Request' | 'Confidential';
+}
+
+export interface PageReference {
+    pageNumber: number;
+    pageTitle: string;
+    claims: ReferenceClaim[];
+}
+
+export interface GeneralSource {
+    category: string;
+    sources: string[];
+}
+
+// Web source used by the evidence registry and UI
+export interface WebSource {
+    id: string;
+    label: string;
+    url: string;
+    category?: string;
+    tags?: string[];
 }

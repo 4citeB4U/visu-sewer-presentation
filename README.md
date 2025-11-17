@@ -230,7 +230,29 @@ npm install
 npm run dev
 ```
 
-The application will open at `http://localhost:3000`
+The application will open at `http://localhost:5173/visu-sewer-presentation/` when running the dev server.
+
+## Deploying to GitHub Pages (Docs folder)
+
+This repository is configured to build a self-contained static site suitable for GitHub Pages. The production build outputs into the `docs/` folder so you can publish the `main` branch's `docs/` folder via GitHub Pages with no additional hosting.
+
+Steps to publish:
+
+1. Build the site:
+```bash
+npm run build
+```
+
+2. Commit the produced `docs/` folder to your `main` branch (the build command overwrites it).
+
+3. In your GitHub repository settings → Pages, set the source to `Deploy from a branch` → `main` branch, `/docs` folder.
+
+4. Wait a minute — your site will be available at `https://<your-org-or-user>.github.io/<repo-name>/`.
+
+Notes:
+- The build is self-contained: it does not rely on CDN import maps or server-side API keys.
+- All asset paths are relative so the site works from a subpath (GitHub Pages) or a custom domain.
+- If you prefer automated deployment, you can add a GitHub Action to run `npm ci` and `npm run build` and commit the `docs/` directory or use `peaceiris/actions-gh-pages` to publish `dist` instead.
 
 ### **Experience Features**
 - **AI Narrator:** Agent Lee presents with a natural voice (prioritized high‑quality voices; chunked TTS with primer fallback for reliability)

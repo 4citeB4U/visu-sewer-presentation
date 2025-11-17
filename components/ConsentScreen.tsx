@@ -211,6 +211,17 @@ export default function ConsentScreen({ onAccept, onDecline }: Props) {
 
   const handleRequestMic = async () => {
     setMicError(null);
+    const hasGetUserMedia =
+      typeof navigator !== "undefined" &&
+      !!navigator.mediaDevices &&
+      typeof navigator.mediaDevices.getUserMedia === "function";
+
+    if (!hasGetUserMedia) {
+      setMicError(
+        "Microphone is not available in this browser or on this connection. Use HTTPS or localhost to enable voice input."
+      );
+      return;
+    }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       // Immediately stop to avoid holding the device open.

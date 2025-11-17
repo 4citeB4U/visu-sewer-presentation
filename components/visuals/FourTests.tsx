@@ -12,13 +12,14 @@ export const FourTests: React.FC<{ section: DeckSection }> = ({ section }) => {
     <div className="h-full relative overflow-hidden">
       {/* Full background image without inline styles to satisfy lint rules */}
       <img
-        src="/images/feild-project-work.png"
+        src={`${(import.meta as any).env?.BASE_URL || '/'}images/feild-project-work.png`}
+        onError={(e: any) => { e.currentTarget.src = `${(import.meta as any).env?.BASE_URL || '/'}images/visu-sewer-truck.png`; }}
         alt="Background - Field project work"
         aria-hidden
         className="absolute inset-0 w-full h-full object-cover saturate-125 contrast-110 brightness-105"
       />
       {/* Readability overlay */}
-  <div className="absolute inset-0 bg-gradient-to-br from-white/70 via-white/55 to-white/40" aria-hidden />
+  <div className="absolute inset-0 bg-linear-to-br from-white/70 via-white/55 to-white/40" aria-hidden />
 
       {/* Foreground content */}
       <div className="relative z-10 h-full flex flex-col p-6 md:p-8">
@@ -42,7 +43,7 @@ export const FourTests: React.FC<{ section: DeckSection }> = ({ section }) => {
           <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl w-full">
             {section.content.points.map((point: string, i: number) => (
               <div key={i} className="flex items-start bg-white/90 rounded-md p-4 shadow backdrop-blur-sm">
-                <svg className="h-5 w-5 text-amber-600 mr-3 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-5 w-5 text-amber-600 mr-3 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <p className="text-gray-900 leading-relaxed text-sm md:text-base">{point}</p>

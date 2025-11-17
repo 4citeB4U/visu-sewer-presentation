@@ -18,7 +18,8 @@ SPDX-License-Identifier: MIT
  * Chat, summarization, and reasoning model
  */
 
-import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@latest';
+// Note: dynamic import of transformers pipeline is performed at runtime in `initialize()`
+// to avoid top-level ESM import failures in Node environments.
 
 class GemmaLLM {
     constructor() {
@@ -76,7 +77,21 @@ class GemmaLLM {
             try {
                 console.log(`🔄 Attempting to load: ${modelName}`);
 
-                this.model = await pipeline(
+                // dynamic import of xenova pipeline in runtime (browser) only
+                let pipelineFunc = null;
+                try {
+                    const mod = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@latest');
+                    pipelineFunc = mod.pipeline || mod.default?.pipeline || null;
+                } catch (e) {
+                    console.warn('Could not dynamically import xenova pipeline:', e && e.message ? e.message : e);
+                }
+
+                if (!pipelineFunc) {
+                    console.warn('No pipeline available to load local model:', modelName);
+                    continue;
+                }
+
+                this.model = await pipelineFunc(
                     'text-generation',
                     modelName,
                     {
@@ -167,6 +182,20 @@ class GemmaLLM {
                 retries++;
                 if (retries >= maxRetries) {
                     console.warn('Max retries reached. Falling back to local model.');
+                    // Clear OpenRouter key so initialize() won't short-circuit to remote-only mode
+                    try {
+                        this.orKey = '';
+                        this.useOpenRouter = false;
+                        this.isLoaded = false;
+                    } catch (e) {
+                        /* ignore */
+                    }
+                    // Ensure a local model is loaded before invoking the fallback
+                    try {
+                        await this.initialize();
+                    } catch (initErr) {
+                        console.warn('Local initialize after OpenRouter failure also failed:', initErr);
+                    }
                     return this.chatLocalFallback(message, context);
                 }
             }
@@ -176,13 +205,42 @@ class GemmaLLM {
     async chatLocalFallback(message, context = []) {
         console.log('Using local fallback model.');
         const prompt = context.map(entry => `${entry.role}: ${entry.content}`).join('\n') + `\nUser: ${message}\nAssistant:`;
-        const result = await this.model(prompt, { max_length: this.maxTokens });
-        return {
-            text: result,
-            model: this.modelName,
-            tokens: result.split(/\s+/).length,
-            hemisphere: 'local'
-        };
+        // Ensure the local model is loaded and callable
+        if (!this.model || typeof this.model !== 'function') {
+            console.log('Local model not ready; attempting to initialize local model...');
+            // Force local-only mode and attempt to load a compatible pipeline
+            try {
+                this.orKey = '';
+                this.useOpenRouter = false;
+                await this.initialize();
+            } catch (e) {
+                console.error('Failed to initialize local model for fallback:', e);
+                throw new Error('No local model available');
+            }
+        }
+
+        // Some Xenova pipelines return an array/object; normalize to text
+        try {
+            const raw = await this.model(prompt, { max_length: this.maxTokens });
+            let text = '';
+            if (typeof raw === 'string') text = raw;
+            else if (Array.isArray(raw) && raw.length > 0) {
+                // attempt to find generated_text property
+                if (raw[0].generated_text) text = raw[0].generated_text;
+                else text = String(raw[0]);
+            } else if (raw && raw.generated_text) text = raw.generated_text;
+            else text = String(raw);
+
+            return {
+                text,
+                model: this.modelName,
+                tokens: text.split(/\s+/).length,
+                hemisphere: 'local'
+            };
+        } catch (err) {
+            console.error('Error invoking local model pipeline:', err);
+            throw err;
+        }
     }
 
     async generate(prompt, options = {}) {
@@ -317,7 +375,9 @@ Generate a helpful, contextual response that acknowledges the input and provides
 }
 
 export const gemmaLLM = new GemmaLLM();
-window.gemmaLLM = gemmaLLM;
-// Expose the constructor on window so external modules can instantiate new instances
-// of GemmaLLM directly. Without this, LEW.llm falls back to stub classes.
-window.GemmaLLM = GemmaLLM;
+if (typeof window !== 'undefined') {
+    window.gemmaLLM = gemmaLLM;
+    // Expose the constructor on window so external modules can instantiate new instances
+    // of GemmaLLM directly. Without this, LEW.llm falls back to stub classes.
+    window.GemmaLLM = GemmaLLM;
+}

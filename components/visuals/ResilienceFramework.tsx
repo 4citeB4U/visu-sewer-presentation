@@ -14,12 +14,23 @@ AGENTS: GEMINI, CLAUDE, GPT4, LLAMA
 SPDX-License-Identifier: MIT
 */
 
-import React from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { DeckSection } from '../../types';
 
 export const ResilienceFramework: React.FC<{ section: DeckSection }> = ({ section }) => {
     if (section.content.type !== 'summary') return null;
+
+    const [ready, setReady] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useLayoutEffect(() => {
+        if (!containerRef.current) return;
+        const { width, height } = containerRef.current.getBoundingClientRect();
+        if (width > 0 && height > 0) {
+            setReady(true);
+        }
+    }, []);
 
     // Political & Regulatory risk avoidance
     const politicalData = [
@@ -56,7 +67,7 @@ export const ResilienceFramework: React.FC<{ section: DeckSection }> = ({ sectio
     ];
 
     return (
-    <div className="p-6 md:p-8 h-full flex flex-col justify-center bg-linear-to-br from-red-50 to-white overflow-hidden">
+    <div ref={containerRef} className="p-6 md:p-8 h-full flex flex-col justify-center bg-linear-to-br from-red-50 to-white overflow-hidden">
             <h2 className="text-3xl font-bold text-gray-800 mb-3 text-center">{section.title}</h2>
             <p className="text-sm text-gray-600 mb-4 max-w-4xl mx-auto text-center">{section.narrative}</p>
             

@@ -18,8 +18,10 @@ SPDX-License-Identifier: MIT
 export const curatedBaseNames = [
   // en-GB
   'Libby', 'Maisie', 'Ryan', 'Sonia', 'Thomas',
-  // en-US
-  'Ana', 'Andrew', 'Aria', 'Ava', 'Brian', 'Christopher', 'Emma', 'Eric', 'Guy', 'Jenny', 'Michelle', 'Roger', 'Steffan'
+  // en-US (Microsoft + common names)
+  'Ana', 'Andrew', 'Aria', 'Ava', 'Brian', 'Christopher', 'Emma', 'Eric', 'Guy', 'Jenny', 'Michelle', 'Roger', 'Steffan',
+  // Other common natural-sounding voice names across browsers/OS
+  'Alex', 'Samantha', 'Daniel', 'Fiona', 'Google US English', 'Google UK English', 'Zira', 'David', 'Mark', 'Angel V'
 ];
 
 /** Allowed locales for curated voices. */
@@ -54,6 +56,64 @@ export function filterCuratedVoices(voices: SpeechSynthesisVoice[]): SpeechSynth
     return Number.MAX_SAFE_INTEGER; // unknowns sorted to end
   };
   return filtered.sort((a, b) => indexOfBase(a) - indexOfBase(b));
+}
+
+/**
+ * Broader curated filter that recognizes non-Microsoft natural voices
+ * (Google, Apple, other OS names) by matching against curatedBaseNames
+ * or by language locality for en-US/en-GB.
+ */
+export function filterCuratedCrossBrowser(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice[] {
+  const v = voices || [];
+  const filtered = v.filter((voice) => {
+    const name = (voice.name || '').toLowerCase();
+    const lang = (voice.lang || '').toLowerCase();
+    // Match if the name contains any curated base name
+    for (const base of curatedBaseNames) {
+      if (name.includes(base.toLowerCase())) return true;
+    }
+    // Accept high-quality en-US/en-GB voices that appear to be local or online
+    if (lang.startsWith('en-us') || lang.startsWith('en-gb')) return true;
+    return false;
+  });
+  // Sort by presence in curated list first, then by locale match
+  filtered.sort((a, b) => {
+    const ai = curatedBaseNames.findIndex(x => a.name.toLowerCase().includes(x.toLowerCase()));
+    const bi = curatedBaseNames.findIndex(x => b.name.toLowerCase().includes(x.toLowerCase()));
+    if (ai !== bi) return (ai === -1 ? Number.MAX_SAFE_INTEGER : ai) - (bi === -1 ? Number.MAX_SAFE_INTEGER : bi);
+    // fallback: prefer en-US
+    const aLang = (a.lang || '').toLowerCase().startsWith('en-us') ? 0 : 1;
+    const bLang = (b.lang || '').toLowerCase().startsWith('en-us') ? 0 : 1;
+    return aLang - bLang;
+  });
+  return filtered;
+}
+
+/**
+ * Pick the best available voice from the browser voices using the curated
+ * cross-browser list as primary preference, then any en-US local voice,
+ * then the first available voice as a last resort.
+ */
+export function pickBestVoice(voices: SpeechSynthesisVoice[], preferredName?: string): SpeechSynthesisVoice | undefined {
+  if (!voices || voices.length === 0) return undefined;
+  // If the caller provided a preferredName, try exact then fuzzy matches
+  if (preferredName) {
+    const exact = voices.find(v => v.name === preferredName);
+    if (exact) return exact;
+    const fuzzy = voices.find(v => v.name.toLowerCase().includes(preferredName.toLowerCase()));
+    if (fuzzy) return fuzzy;
+  }
+  // 1) curated cross-browser
+  const curated = filterCuratedCrossBrowser(voices);
+  if (curated.length > 0) return curated[0];
+  // 2) any en-US local service voice
+  const enLocal = voices.find(v => v.localService && /en-/i.test(v.lang));
+  if (enLocal) return enLocal;
+  // 3) any en-US voice
+  const en = voices.find(v => /en-/i.test(v.lang));
+  if (en) return en;
+  // 4) fallback first
+  return voices[0];
 }
 
 /**

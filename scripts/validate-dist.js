@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const distDir = path.resolve(__dirname, '..', 'dist');
+const distDir = path.resolve(__dirname, '..', 'docs');
 const indexPath = path.join(distDir, 'index.html');
 
 function findAssets(html) {
