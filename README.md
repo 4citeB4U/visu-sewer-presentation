@@ -229,6 +229,27 @@ npm install
 ```bash
 npm run dev
 ```
+The application will open at `http://localhost:5173/visu-sewer-presentation/` when running the dev server.
+
+**Important:** Do NOT open `index.html` directly with the `file://` protocol. Modern browsers block module loading and cross-origin requests for local files, which causes errors like:
+
+- "Access to script at 'file:///.../index.tsx' from origin 'null' has been blocked by CORS policy"
+- "Failed to load resource: net::ERR_FAILED"
+
+To view the built site locally, serve the `docs/` folder over HTTP. You can use the included convenience script or any static server:
+
+```powershell
+# Build the site (produces ./docs)
+npm run build
+
+# Serve the built site on http://localhost:8080
+npm run serve-docs
+
+# Or use a temporary static server (if you don't want to add the npm script)
+npx http-server ./docs -p 8080 --cors
+```
+
+Then open `http://localhost:8080/visu-sewer-presentation/` (or `http://localhost:8080/`) in your browser.
 
 The application will open at `http://localhost:5173/visu-sewer-presentation/` when running the dev server.
 

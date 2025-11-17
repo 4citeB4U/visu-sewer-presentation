@@ -6,7 +6,8 @@
     "dev": "node ./node_modules/vite/bin/vite.js --port 5173 --strictPort",
     "build": "node ./node_modules/vite/bin/vite.js build",
     "build:gh": "node ./node_modules/vite/bin/vite.js build",
-    "preview": "node ./node_modules/vite/bin/vite.js preview"
+    "preview": "node ./node_modules/vite/bin/vite.js preview",
+    "serve-docs": "npx http-server ./docs -p 8080 --cors"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
