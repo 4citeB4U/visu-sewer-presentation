@@ -15,7 +15,7 @@ SPDX-License-Identifier: MIT
 -->
 
 # Github Setup & Contribution Guide
-
+v 12
 ## Repository Structure
 This repo contains all code, assets, and documentation for the VisuSewer Strategic Asset & Growth Deck. All files are LeeWay v11 compliant and ready for open-source or private deployment.
 
@@ -253,6 +253,14 @@ Notes:
 - The build is self-contained: it does not rely on CDN import maps or server-side API keys.
 - All asset paths are relative so the site works from a subpath (GitHub Pages) or a custom domain.
 - If you prefer automated deployment, you can add a GitHub Action to run `npm ci` and `npm run build` and commit the `docs/` directory or use `peaceiris/actions-gh-pages` to publish `dist` instead.
+
+Additional GitHub Pages tips:
+
+- In the repository, go to **Settings → Pages** (or **Settings → Pages and deployments**). Select **Branch: main** and **Folder: /docs** then click **Save**. GitHub will validate and publish the folder.
+- If your repo is private, enable Pages for private repos in the Pages settings and select the correct access option.
+- If you want an automated workflow instead of committing `docs/`, add a GitHub Action that runs `npm ci` and `npm run build` and then deploys with `peaceiris/actions-gh-pages` (recommended for CI-driven sites).
+
+Verify the published site by visiting `https://<your-org-or-user>.github.io/<repo-name>/` after a minute. If you see a 404, clear the browser cache and retry — GitHub sometimes needs a short propagation window.
 
 ### **Experience Features**
 - **AI Narrator:** Agent Lee presents with a natural voice (prioritized high‑quality voices; chunked TTS with primer fallback for reliability)

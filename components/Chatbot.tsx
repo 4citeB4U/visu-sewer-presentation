@@ -1244,6 +1244,62 @@ Otherwise respond with a helpful, conversational message.
                 >
                   Resume Presentation
                 </button>
+                
+                    <button
+                      type="button"
+                      className="px-3 py-1 rounded text-xs font-medium border bg-blue-50 border-blue-300 text-blue-700"
+                      onClick={async () => {
+                        // Ask about the current page using agentTeam.explainChart
+                        try {
+                          const idx = Number(currentSection ?? resumeIndex ?? 0);
+                          const pagePrompt = `Explain page ${idx + 1}: ${pitchDeckData[idx].title}`;
+                          setIsLoading(true);
+                          const response = await agentTeam.explainChart(
+                            pagePrompt,
+                            chatbotContext
+                          );
+                          let text = "";
+                          if (response && (response as any).best && (response as any).best.text) {
+                            text = (response as any).best.text;
+                          } else if (typeof response === "string") {
+                            text = response;
+                          } else {
+                            text = generatePageExplanation(idx);
+                          }
+
+                          // Add model message and speak
+                          const botMessage: ChatMessage = { role: "model", text, sources: [] };
+                          setMessages((prev) => [...prev, botMessage]);
+                          try { await speak(text); } catch (e) { console.warn('TTS speak failed', e); }
+                        } catch (e) {
+                          console.warn('explainChart failed', e);
+                          const fallback = generatePageExplanation(currentSection ?? resumeIndex ?? 0);
+                          setMessages((prev) => [...prev, { role: 'model', text: fallback, sources: [] }]);
+                          try { await speak(fallback); } catch (e) {}
+                        } finally {
+                          setIsLoading(false);
+                        }
+                      }}
+                    >
+                      Ask About This Page
+                    </button>
+
+                    <button
+                      type="button"
+                      className="px-3 py-1 rounded text-xs font-medium border bg-indigo-50 border-indigo-300 text-indigo-700"
+                      onClick={() => {
+                        // Continue narration from currentSection
+                        const target = currentSection ?? resumeIndex ?? 0;
+                        setResumeIndex(target);
+                        setCurrentSection(target);
+                        const msg = `Continuing presentation from page ${Number(target) + 1}: ${pitchDeckData[Number(target)].title}.`;
+                        setMessages((prev) => [...prev, { role: 'model', text: msg, sources: [] }]);
+                        startPresentation();
+                        try { speak(msg); } catch (e) { console.warn('TTS continue failed', e); }
+                      }}
+                    >
+                      Continue From Here
+                    </button>
               </div>
 
             <div className="flex gap-2 items-stretch">
