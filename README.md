@@ -15,7 +15,7 @@ SPDX-License-Identifier: MIT
 -->
 
 # Github Setup & Contribution Guide
-v 12
+v 13
 ## Repository Structure
 This repo contains all code, assets, and documentation for the VisuSewer Strategic Asset & Growth Deck. All files are LeeWay v11 compliant and ready for open-source or private deployment.
 
